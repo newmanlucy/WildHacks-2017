@@ -1,10 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet" href="../css/style.css">
   <title> Chicago weather map </title>
+  <script type="text/javascript">
+    function updateWeather(checkbox) {
+      if (checkbox.checked)
+      {
+          alert(checkbox.value);
+      }
+      else
+      {
+        alert("b");
+      }
+    }
+  </script>
+
 </head>
 <body>
   <h1> Chicago weather! </h1>
+  <p> What kind of weather do you want? </p>
+  <div id="weatherCheckboxes">
+    <input type="checkbox" name="weather" value="Sunny" onclick="updateWeather(this)"> Sunny<br>
+    <input type="checkbox" name="weather" value="Cloudy" onclick="updateWeather(this)"> Cloudy<br>
+    <input type="checkbox" name="weather" value="Rainy" onclick="updateWeather(this)"> Rainy<br>
+  </div>
 
 </body>
 </html>
