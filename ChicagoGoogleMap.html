@@ -9,7 +9,7 @@
     <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
     <script src="chicago_neighborhoods.json"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBEx5L3qryD0FaDRo9EZMrsiLRyjm49-CI&libraries=geometry,places,visualization&callback=initMap" async defer></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   </head>
   <body>
     <h1> Chicago weather! </h1>
@@ -21,8 +21,32 @@
         <input type="checkbox" name="weather" value="Rainy" onclick="updateWeather(this)"> Rainy<br>
       </div>
       <br>
-      <div id="specifyLoc">
-        
+      <div id="showPlaces">
+        <input type="button" value="Show places" onclick="showPlaces({lat: 41.8, lng: -87.6}, 'store');">
+      </div>
+      <br>
+      <div id="HereWeGo">
+        <input type="button" value="Here we go!" onclick="showPlacesHere('41.8,-87.6', 'sights-museums');">
+      </div>
+      <br>
+      <p>What do you want to do today?</p>
+      <div class="dropdown">
+       <select id="wantToDoChoice" onchange="processWantToDo()">
+          <option class="goOption" value="coffee-tea">Get coffee or tea</option>
+          <option class="goOption" value="eat-drink">Eat and drink </option>
+          <option class="goOption" value="going-out">Go out</option>
+          <option class="goOption" value="leisure-outdoor">Do something liesurely </option>
+          <option class="goOption" value="natural-geographical">Explore nature </option>
+          <option class="goOption" value="restaurant">Go to a restaurant </option>
+          <option class="goOption" value="snacks-fast-food">Get snacks or fast food</option>
+          <option class="goOption" value="sights-museums">See sights and museums </option>
+          <option class="goOption" value="shopping">Go shopping </option>
+        </div>
+      </select>
+      </div> 
+      <div>
+        <br>
+        <p id="wantToDoText"></p>
       </div>
       <br>
       <div id="resetButton">
@@ -34,9 +58,10 @@
       var map;
       var service;
       var infowindow;
-
+      var chicago;
+      
       function initMap() {
-        var chicago = {lat: 41.8318, lng: -87.6832};
+        chicago = {lat: 41.8318, lng: -87.6832};
         map = new google.maps.Map(document.getElementById('map'), {
           center: chicago,
           zoom: 11
@@ -51,10 +76,47 @@
           fillColor: 'blue',
           strokeWeight: 1
         });
-
-        showPlaces({lat: 41.8, lng: -87.6}, "store");
-
       }
+
+      function locToCommaSep(loc) {
+        return loc["lat"] + "," + loc["lng"];
+      }
+
+// HERE app ID: p12uI7q3kXyMbTvWxVwy
+// HERE app code: Vwb0ubafZTNhrG-4g6EGIA
+      function showPlacesHere(loc, attrType) {
+        console.log("show places here");
+        console.log(loc);
+        console.log(attrType);
+        $.ajax({
+          url: 'https://places.demo.api.here.com/places/v1/discover/explore',
+          type: 'GET',
+          data: {
+            at: loc,
+            cat: attrType,
+            app_id: 'p12uI7q3kXyMbTvWxVwy',
+            app_code: 'Vwb0ubafZTNhrG-4g6EGIA'
+          },
+          beforeSend: function(xhr){
+            xhr.setRequestHeader('Accept', 'application/json');
+          },
+          success: function (data) {
+            showHerePlaces(commaSepToLoc(loc), data);
+          }
+        });
+      }
+
+      function processWantToDo() {
+        var wantToDoChoice = document.getElementById("wantToDoChoice");
+        var wantToDoText = document.getElementById("wantToDoText");
+        var category = wantToDoChoice.options[wantToDoChoice.selectedIndex].value;
+        var activity = wantToDoChoice.options[wantToDoChoice.selectedIndex].text;
+        var encouragingPhrase = "Let's " + activity.toLowerCase() + "!";
+        wantToDoText.innerHTML = encouragingPhrase;
+        showPlacesHere(locToCommaSep(chicago), category);
+      }
+      console.log("done");
+
     </script>
   </body>
 </html>
