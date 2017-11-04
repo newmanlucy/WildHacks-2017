@@ -20,7 +20,7 @@
       }
     </style>
     <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
-
+    <script src="chicago_neighborhoods.json"></script>
   </head>
   <body>
     <div id="map"></div>
@@ -34,11 +34,17 @@
       // transitlayer
       var transitLayer = new google.maps.TransitLayer();
         transitLayer.setMap(map);
-        var bikeLayer = new google.maps.BicyclingLayer();
-          bikeLayer.setMap(map);
-      map.data.loadGeoJson(data/chicago_neighborhoods.json)
+      //  var bikeLayer = new google.maps.BicyclingLayer();
+    //      bikeLayer.setMap(map);
+    //  map.data.loadGeoJson('chicago_neighborhoods.json')
 
-      addGeoJson()
+    map.data.addGeoJson(neighborhoods_json);
+
+    map.data.setStyle({
+  fillColor: 'blue',
+  strokeWeight: 1
+});
+  //    addGeoJson()
       }
 
 
