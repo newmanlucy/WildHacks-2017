@@ -2,10 +2,10 @@
 
 Whether the weather be _cold_
 
-Or whether the weather be *hot*,
+Or whether the weather be **hot**,
 
 We'll weather the weather,
 
 Whatever the weather,
 
-Whether we like it or not!
+Whether we like it or **not!**
