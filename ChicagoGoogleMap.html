@@ -46,6 +46,7 @@
   var infowindow;
   var chicago = {lat: 41.8318, lng: -87.6832};
   var neighborhood = chicago;
+  var attrType = "restaurant";
 
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -67,8 +68,23 @@
 
     var d;
     var contentStrings=[];
-    for(d in ids){
-      contentStrings [d] = "<a href=http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=" + ids[d] + ">" + names[d] +"<br> </a> <img width = '100' src=http://banners.wunderground.com/cgi-bin/banner/ban/wxBanner?bannertype=wxstnsticker&weatherstationcount=" + ids[d] + ">";
+    var infowindows=[];
+    for(d = 0; d < ids.length; d++){
+      var loc = locToCommaSep(locations[d]);
+      var name = "learnMore" + d.toString();
+      contentStrings [d] = 
+      `
+      <a href=http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID= ${ids[d]}> 
+        ${names[d]}
+      <br>
+      </a>
+      <img width = '90' src=http://banners.wunderground.com/cgi-bin/banner/ban/wxBanner?bannertype=wxstnsticker&weatherstationcount=${ids[d]}>
+      <br>
+      <input type="button" id="${name}" value="Things to do" onclick="console.log(${name});showPlacesHere('${loc}','${attrType}');">
+      `
+      infowindows[d] = (new google.maps.InfoWindow({
+        content: contentStrings[d]
+      }));
     }
 
     var m;
@@ -172,10 +188,10 @@
    var wantToDoText = document.getElementById("wantToDoText");
    var category = wantToDoChoice.options[wantToDoChoice.selectedIndex].value;
    var activity = wantToDoChoice.options[wantToDoChoice.selectedIndex].text;
-   var encouragingPhrase = "Let's " + activity.toLowerCase() + "!";
+   var encouragingPhrase = "Let's " + activity.toLowerCase() + "! "
+   + "Click a weather icon for to see ur options";
    wantToDoText.innerHTML = encouragingPhrase;
    attrType = category;
-   showPlacesHere(locToCommaSep(neighborhood), category);
  }
 
  var ids = [
