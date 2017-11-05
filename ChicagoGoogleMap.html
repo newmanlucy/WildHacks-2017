@@ -58,12 +58,12 @@
       var map;
       var service;
       var infowindow;
-      var chicago;
-      
+      var chicago = {lat: 41.8318, lng: -87.6832};
+      var neighborhood = chicago;
+
       function initMap() {
-        chicago = {lat: 41.8318, lng: -87.6832};
         map = new google.maps.Map(document.getElementById('map'), {
-          center: chicago,
+          center: chicago,chicago = {lat: 41.8318, lng: -87.6832};
           zoom: 11
         });
         // transitlayer
@@ -113,7 +113,8 @@
         var activity = wantToDoChoice.options[wantToDoChoice.selectedIndex].text;
         var encouragingPhrase = "Let's " + activity.toLowerCase() + "!";
         wantToDoText.innerHTML = encouragingPhrase;
-        showPlacesHere(locToCommaSep(chicago), category);
+        attrType = category;
+        showPlacesHere(locToCommaSep(neighborhood), category);
       }
       console.log("done");
 

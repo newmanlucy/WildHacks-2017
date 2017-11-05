@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="css/style.css">
+    <title> Chicago weather map </title>
+    <script type="text/javascript" src="js/maps.js"></script>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+    <script src="chicago_neighborhoods.json"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBEx5L3qryD0FaDRo9EZMrsiLRyjm49-CI&libraries=geometry,places,visualization&callback=initMap" async defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/skycons/1396634940/skycons.min.js'></script>
+  </head>
+<body>
+<h1> Chicago weather! </h1>
+    <div id="buttons">
+      <div id="weatherCheckboxes">
+        <p> What kind of weather do you want? </p>
+        <input type="checkbox" name="weather" value="Sunny" onclick="updateWeather(this)"> Sunny<br>
+        <input type="checkbox" name="weather" value="Cloudy" onclick="updateWeather(this)"> Cloudy<br>
+        <input type="checkbox" name="weather" value="Rainy" onclick="updateWeather(this)"> Rainy<br>
+      </div>
+      <br>
+      <div id="showPlaces">
+        <input type="button" value="Show places" onclick="showPlaces({lat: 41.8, lng: -87.6}, 'store');">
+      </div>
+      <br>
+      <div id="HereWeGo">
+        <input type="button" value="Here we go!" onclick="showPlacesHere('41.8,-87.6', 'sights-museums');">
+      </div>
+      <br>
+      <p>What do you want to do today?</p>
+      <div class="dropdown">
+       <select id="wantToDoChoice" onchange="processWantToDo()">
+          <option class="goOption" value="coffee-tea">Get coffee or tea</option>
+          <option class="goOption" value="eat-drink">Eat and drink </option>
+          <option class="goOption" value="going-out">Go out</option>
+          <option class="goOption" value="leisure-outdoor">Do something liesurely </option>
+          <option class="goOption" value="natural-geographical">Explore nature </option>
+          <option class="goOption" value="restaurant">Go to a restaurant </option>
+          <option class="goOption" value="snacks-fast-food">Get snacks or fast food</option>
+          <option class="goOption" value="sights-museums">See sights and museums </option>
+          <option class="goOption" value="shopping">Go shopping </option>
+        </div>
+      </select>
+      </div> 
+      <div>
+        <br>
+        <p id="wantToDoText"></p>
+      </div>
+      <br>
+      <div id="resetButton">
+        <input type="button" value="Reset weather map" onclick="initMap()">
+      </div>
+    </div>
+    <div id="map"></div>
+  <script>
+  var map;
+  var service;
+  var infowindow;
+  var attrType = "restaurant";
+  var chicago = {lat: 41.8318, lng: -87.6832};
+  var lat;
+  var lng;
+
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: chicago,
+      zoom: 11
+    });
+    // transitlayer
+    var transitLayer = new google.maps.TransitLayer();
+    transitLayer.setMap(map);
+    //  var bikeLayer = new google.maps.BicyclingLayer();
+    //      bikeLayer.setMap(map);
+
+    map.data.addGeoJson(neighborhoods_json);
+
+    map.data.setStyle({
+      fillColor: 'blue',
+      strokeWeight: 1
+    });
+
+    function skycons() {
+    var i,
+      icons = new Skycons({
+        "color" : "#FFFFFF",
+        "resizeClear": true // nasty android hack
+      }),
+      list  = [ // listing of all possible icons
+        "clear-day",
+        "clear-night",
+        "partly-cloudy-day",
+        "partly-cloudy-night",
+        "cloudy",
+        "rain",
+        "sleet",
+        "snow",
+        "wind",
+        "fog"
+      ];
+
+      // loop thru icon list array
+      for(i = list.length; i--;) {
+        var weatherType = list[i], // select each icon from list array
+            // icons will have the name in the array above attached to the
+            // canvas element as a class so let's hook into them.
+            elements = document.getElementsByClassName( weatherType );
+
+        // loop thru the elements now and set them up
+        for (e = elements.length; e--;) {
+          icons.set(elements[e], weatherType);
+        }
+      }
+
+      // animate the icons
+      icons.play();
+    }
+
+
+    var skicons = [];
+    $.getJSON('https://api.darksky.net/forecast/f9f3558671673a14c4d0d409c53a1c6f/41.948,-87.808?extend=hourly&callback=?', function(forecast) {
+        // Loop thru daily forecasts
+        for(var i = 0, l = forecast.daily.data.length; i < l-1; i++) {
+          skicons[i]  = forecast.daily.data[i].icon;}
+
+          // Append Markup for each Forecast of the 7 day week
+          $("#forecast").append(
+            '<li class="shade-'+ skicons +'"><div class="card-container"><div><div class="front card"><div>' +
+              "<div class='graphic'><canvas class=" + skicons + "></canvas></div>" +'</div></div></li>'
+          );
+      skycons();
+      });
+
+    var d;
+    var contentStrings=[];
+    var infowindows=[];
+
+
+    for(d = 0; d < ids.length; d++){
+      var loc = locToCommaSep(locations[d]);
+      var name = "learnMore" + d.toString();
+      contentStrings [d] = 
+      `
+      <a href=http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID= ${ids[d]}> 
+        ${names[d]}
+      <br>
+      </a>
+      <img width = '90' src=http://banners.wunderground.com/cgi-bin/banner/ban/wxBanner?bannertype=wxstnsticker&weatherstationcount=${ids[d]}>
+      <br>
+      <input type="button" id="${name}" value="Things to do" onclick="console.log(${name});showPlacesHere('${loc}','${attrType}');">
+      `
+      infowindows[d] = (new google.maps.InfoWindow({
+        content: contentStrings[d]
+      }));
+    }
+
+
+    //var contentStrings = "<a href=http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=" + id + "> </a> <img width = '90' src=http://banners.wunderground.com/cgi-bin/banner/ban/wxBanner?bannertype=wxstnsticker&weatherstationcount=" + id + ">";
+
+    var u;
+    var iconCs = [];
+
+
+    function transformIcon(){
+        for (u in skicons){
+          if(skicons[u]=='clear-day'){
+            iconCs[u]= 'clear';
+          }
+          else if(skicons[u]== 'clear-night'){
+            iconsCs[u] = 'nt_clear';
+          }
+          else if(skicons[u]== 'partly-cloudy-day'){
+            iconsCs[u] = 'partlycloudy';
+          }
+          else if(skicons[u] == 'partly-cloudy-night'){
+            iconsCs[u] = 'nt_partlycloudy';
+          }
+          else if(skicons[u] == 'wind'){
+            iconsCs[u] = 'partlycloudy';
+          }
+          else{
+            iconsCs[u] = skicons[u];
+          }
+        }
+      }
+
+    var w;
+    var icons = [];
+    var iconBs = ["clear",'rain'];
+    for(w in ids){
+    //  var iconP[w] = "http://api.wunderground.com/api/0f6f40b670b060ab/hourly/q/pws:" + ids[w] +".res.hourly_forecast.FCTTIME.json"
+      icons[w] = {
+
+      //  if (hour >= 19) {
+          url: 'https://icons.wxug.com/i/c/k/' + iconBs[0] + '.gif',//;}
+      //    else{
+      //    url:'https://icons.wxug.com/i/c/k/clear.gif';},
+
+      //'http://api.wunderground.com/api/0f6f40b670b060ab/conditions/q/IL/Chicago.res.current_observation.icon_url.json',
+      //  url: 'https://icons.wxug.com/i/c/k/' + iconP + '.gif',
+
+      //  icons[w]={
+      //  url: h.conditions.current_observation.icon_url ,
+        scaledSize: new google.maps.Size(20,20)
+      };
+    }
+
+    // Create an array of alphabetical characters used to label the markers.
+    //var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+    // Add some markers to the map.
+    // Note: The code uses the JavaScript Array.prototype.map() method to
+    // create an array of markers based on a given "locations" array.
+    // The map() method here has nothing to do with the Google Maps API.
+    var markers = locations.map(function(location, i) {
+      var marker = new google.maps.Marker({
+        position: location,
+        //  label: labels[i % labels.length],
+        icon: icons[i]
+      });
+
+      return {"marker": marker, "loc": location};
+    });
+
+    var i;
+    var lastW = null;
+    for (i in markers){
+      markers[i]["marker"].setMap(map),
+    //  google.maps.event.addListener(markers[i],)
+      markers[i]["marker"].addListener('click', (function(i) {
+        return function() {
+          closeLast();
+          infowindows[i].open(map, markers[i]["marker"]);
+          lastW = infowindows[i];
+          console.log(markers[i]["loc"]);
+        }
+      })(i));
+
+      function closeLast() {
+        if(lastW) {
+          lastW.close();
+        }
+      }
+
+    }
+    //markers[1].setMap(map);
+    //markers[2].setMap(map);
+    // Add a marker clusterer to manage the markers.
+    //var markerCluster = new MarkerClusterer(map, markers,
+    //  {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+  }
+
+      function locToCommaSep(loc) {
+        return loc["lat"] + "," + loc["lng"];
+      }
+
+// HERE app ID: p12uI7q3kXyMbTvWxVwy
+// HERE app code: Vwb0ubafZTNhrG-4g6EGIA
+      function showPlacesHere(loc, attrType) {
+        console.log("show places here");
+        inLoc = loc + ";r=1";
+        console.log(inLoc);
+        console.log("here");
+        if (!attrType) {
+          console.log("no attrType");
+        }
+        console.log(attrType);
+        $.ajax({
+          url: 'https://places.demo.api.here.com/places/v1/discover/explore',
+          type: 'GET',
+          data: {
+            at: loc,
+            cat: attrType,
+            app_id: 'p12uI7q3kXyMbTvWxVwy',
+            app_code: 'Vwb0ubafZTNhrG-4g6EGIA'
+          },
+          beforeSend: function(xhr){
+            xhr.setRequestHeader('Accept', 'application/json');
+          },
+          success: function (data) {
+            showHerePlaces(commaSepToLoc(loc), data);
+          }
+        });
+      }
+
+      function processWantToDo() {
+        var wantToDoChoice = document.getElementById("wantToDoChoice");
+        var wantToDoText = document.getElementById("wantToDoText");
+        var category = wantToDoChoice.options[wantToDoChoice.selectedIndex].value;
+        var activity = wantToDoChoice.options[wantToDoChoice.selectedIndex].text;
+        var encouragingPhrase = "Let's " + activity.toLowerCase() + "!";
+        wantToDoText.innerHTML = encouragingPhrase;
+        showPlacesHere(locToCommaSep(chicago), category);
+      }
+
+
+
+
+      console.log("done");
+    
+    </script>
+
+    </body>
+    </html>
