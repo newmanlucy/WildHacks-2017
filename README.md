@@ -1,8 +1,8 @@
 # WildHacks-2017
 
-Whether the weather be cold
+Whether the weather be _cold_
 
-Or whether the weather be hot,
+Or whether the weather be *hot*,
 
 We'll weather the weather,
 
