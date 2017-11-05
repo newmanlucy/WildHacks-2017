@@ -1,5 +1,3 @@
-
-
 /*
 Author: XpeedStudio
 Author URI: http://themeforest.net/user/XpeedStudio/portfolio
@@ -8,12 +6,15 @@ Author URI: http://themeforest.net/user/XpeedStudio/portfolio
    Author's custom styles
    ========================================================================== */
 #buttons {
+    /*background-color: #4CAF50;*/
     width: 20%;
     display: inline-block;
     vertical-align: top;
+    text-align: center;
 }
 
 #weatherCheckboxes {
+    /*background-color: #4CAF50;*/
     height: 100%;
     width: 100%;
     vertical-align: top;
@@ -22,6 +23,8 @@ Author URI: http://themeforest.net/user/XpeedStudio/portfolio
 
 #resetButton {
     vertical-align: bottom;
+    text-align: center;
+
 }
 
 #map {
@@ -34,12 +37,12 @@ html, body {
     height: 75%;
     margin: 0;
     padding: 0;
-} 
+}
 
 
 .dropbtn {
-    background-color: #d000d0;
-    color: white;
+    background-color: #f9f9f9;
+    color: black;
     padding: 16px;
     font-size: 16px;
     border: none;
@@ -53,11 +56,12 @@ html, body {
     display: inline-block;
 }
 
-/* Dropdown Content (Hidden by Default) */
-#goOption {
+
+/* Dropdown Content (Hidden by Default) #goOption*/
+.dropdown-content {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
+    background-color: white;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
@@ -72,7 +76,7 @@ html, body {
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: #f1f1f1}
+.dropdown-content a:hover {background-color: #3e8e41}
 
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
@@ -81,13 +85,12 @@ html, body {
 
 /* Change the background color of the dropdown button when the dropdown content is shown */
 .dropdown:hover .dropbtn {
-    background-color: #d0d0d0;
+    background-color: #f9f9f9;
 }
 
 
 /* Always set the map height explicitly to define the size of the div
 * element that contains the map.
-
 AIzaSyBEx5L3qryD0FaDRo9EZMrsiLRyjm49-CI*/
 /*#map {
 height: 75%;
@@ -98,7 +101,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #ffffff;
+    background-color: #f9f9f9;
     font-size: 15px;
     color: #565656;
     width: 100%;
@@ -190,6 +193,7 @@ h5 {
     line-height: 2rem;
 }
 h1 {
+    text-align: center;
     font-size: 3rem;
     line-height: 5rem;
     font-weight: 300;
@@ -211,7 +215,8 @@ h4 {
     margin-bottom: 1.1rem;
 }
 h5 {
-    font-size: 1.3rem;
+    text-align: center;
+    font-size: 1.1rem;
     margin-bottom: 1rem;
 }
 h6 {
@@ -219,6 +224,7 @@ h6 {
     margin-bottom: .9rem;
 }
 p {
+    text-align: center;
     line-height: 1.5rem;
     font-size: 1.1rem;
 }
