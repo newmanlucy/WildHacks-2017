@@ -1,63 +1,92 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Simple Map</title>
+  <title>Chicago Activities by Weather</title>
   <meta name="viewport" content="initial-scale=1.0">
   <meta charset="utf-8">
-  <style>
-  #map {
-    height: 100%;
-  }
-  /* Optional: Makes the sample page fill the window. */
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  </style>
-  <script src="chicago_neighborhoods.json"></script>
+  <link rel="stylesheet" href="css/style1.css">
 </head>
 <body>
-  <div id="map"></div>
-  <script>
+    <h1> Whatever the Weather Chicago </h1>
+    <div id="buttons">
 
+      <div class="dropdown">
+       <button class="dropbtn">What do you want to do today?</button>
+       <select id="wantToDoChoice" onchange="processWantToDo()">
+          <option class="goOption" value="restaurant" selected ="selected">Go to a restaurant </option>
+          <option class="goOption" value="coffee-tea">Get coffee or tea</option>
+          <option class="goOption" value="eat-drink">Eat and drink </option>
+          <option class="goOption" value="going-out">Go out</option>
+          <option class="goOption" value="leisure-outdoor">Do something leisurely </option>
+          <option class="goOption" value="natural-geographical">Explore nature </option>
+          <option class="goOption" value="snacks-fast-food">Get snacks or fast food</option>
+          <option class="goOption" value="sights-museums">See sights and museums </option>
+          <option class="goOption" value="shopping">Go shopping </option>
+        </div>
+      </select>
+      </div>
+      <div>
+        <br>
+        <p id="wantToDoText"></p>
+      </div>
+      <br>
+      <div id="resetButton">
+        <input type="button" value="Reset weather map" onclick="initMap()">
+      </div>
+      <h5> <br>Whether the weather be cold <br> Or whether the weather be hot,<br>We'll weather the weather,<br>Whatever the weather,<br>Whether we like it or not!</h5>
+    </div>
+    <div id="map"></div>
+  <script>
   var map;
+  var service;
+  var infowindow;
+  var chicago = {lat: 41.8318, lng: -87.6832};
+  var neighborhood = chicago;
+  var attrType = "restaurant";
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: 41.8818, lng: -87.6832},
       zoom: 11
     });
-
     var transitLayer = new google.maps.TransitLayer();
     transitLayer.setMap(map);
     //  var bikeLayer = new google.maps.BicyclingLayer();
     //      bikeLayer.setMap(map);
-
     map.data.addGeoJson(neighborhoods_json);
-
     map.data.setStyle({
       fillColor: 'blue',
       strokeWeight: 1
     });
-
     var d;
     var contentStrings=[];
-    for(d in ids){
-      contentStrings [d] = "<a href=http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=" + ids[d] + ">" + names[d] +"<br> </a> <img width = '100' src=http://banners.wunderground.com/cgi-bin/banner/ban/wxBanner?bannertype=wxstnsticker&weatherstationcount=" + ids[d] + ">";
+    var infowindows=[];
+    for(d = 0; d < ids.length; d++){
+      var loc = locToCommaSep(locations[d]);
+      var name = "learnMore" + d.toString();
+      contentStrings [d] =
+      `
+      <a href=http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID= ${ids[d]}>
+        ${names[d]}
+      <br>
+      </a>
+      <img width = '90' src=http://banners.wunderground.com/cgi-bin/banner/ban/wxBanner?bannertype=wxstnsticker&weatherstationcount=${ids[d]}>
+      <br>
+      <input type="button" id="${name}" value="Things to do" onclick="console.log(${name});showPlacesHere('${loc}');">
+      `
+      infowindows[d] = (new google.maps.InfoWindow({
+        content: contentStrings[d]
+      }));
     }
-
     var m;
     var infowindows=[];
     for(m in contentStrings) {
       infowindows[m] = (new google.maps.InfoWindow({
         content: contentStrings[m]}));}
-
     var icons = [];
     var iconCs = [];
     var q=0;
     var markers = [];
     var skycons=[];
-
     function createSky() {
       for(var q=0; q<locations.length; q++){
           $.getJSON ('https://api.darksky.net/forecast/f9f3558671673a14c4d0d409c53a1c6f/' + locations[q].lat + ','+ locations[q].lng + '?extend=currently&callback=?', function (forecast)
@@ -66,7 +95,6 @@
        }
     }
     createSky();
-
     function delay(){
       setTimeout(function(){
           for(var q=0; q<skycons.length; q++){
@@ -88,21 +116,17 @@
               else {
                 iconCs[q] = skycons[q];
               }
-
               icons[q] = {
                 url: 'https://icons.wxug.com/i/c/k/' + iconCs[q] + '.gif',//;}
                 scaledSize: new google.maps.Size(25,25)};
               }
-
               var markers = locations.map(function(location, i) {
                 return new google.maps.Marker({
                    position: location,
                    icon: icons[i]});});
-
               var i;
               var lastW = null;
               function closeLast() {if(lastW) {lastW.close();}}
-
               for (i in markers){
                 markers[i].setMap(map),
                 markers[i].addListener('click', (function(i) {
@@ -110,163 +134,50 @@
                      closeLast();
                      infowindows[i].open(map, markers[i]);
                      lastW = infowindows[i];}})(i));};
-      }, 2600)
+      }, 5000)
     }
     delay()
  };
-
- var ids = [
-  "KILCHICA490",
-  "KILCHICA189",
-  "KILCHICA491",
-  "KILOAKPA9",
-  "KILCHICA317",
-  "KILCHICA428",
-  "KILCHICA537",
-  "KILCHICA535",
-  "KILCHICA266",
-  "KILCHICA199",
-  "KILCHICA530",
-  "KILCHICA130",
-  "KILCHICA368",
-  "KILCHICA507",
-  "KILCHICA223",
-  "KILCHICA231",
-  "KILCHICA253",
-  "KILCHICA516",
-  "KILCHICA106",
-  "KILCHICA366",
-  "KILCHICA421",
-  "KILCHICA173",
-  "KILCHICA207",
-  "KILCHICA489",
-  "KILCHICA483",
-  "KILCHICA357",
-  "KILCHICA468",
-  "KILCHICA221",
-  "KILCHICA330",
-  "KILCHICA536",
-  "KILCHICA401",
-  "KILCHICA470",
-  "KILCHICA364",
-  "KILCHICA370",
-  "KILCHICA450",
-  "KILCHICA166",
-  "KILCHICA310",
-  "KILCHICA534",
-  "KILCHICA225",
-  "KILCHICA37",
-  "KILCHICA376",
-  "KILCHICA463",
-  "KILCHICA529",
-  "KILCHICA495",
-  "CMTI2",
-  "KILCHICA291"
-]
-
-var names = [
-  "Dunning",
-  "Portage Park",
-  "Belmont Cragin",
-  "Austin",
-  "North Center",
-  "Avondale",
-  "Logan Square",
-  "Smith Park",
-  "Ukrainian Village",
-  "West Town",
-  "Near West Side",
-  "Greektown",
-  "River North",
-  "Near North Side",
-  "Navy Pier",
-  "Streeterville",
-  "Gold Coast",
-  "Old Town",
-  "Lincoln Park",
-  "Lake View",
-  "Park West",
-  "Wrigley Field",
-  "Uptown",
-  "Lincoln Square",
-  "Ravenswood",
-  "Andersonville",
-  "Ravenswood",
-  "Edgewater",
-  "Rogers Park",
-  "West Ridge",
-  "North Park",
-  "Norwood Park",
-  "O'Hare",
-  "Little Italy",
-  "Chinatown",
-  "Near South Side",
-  "Grant Park",
-  "Bronzeville, Back of the Yards, Kenwood",
-  "North & South Lawndale",
-  "Midway",
-  "Beverly",
-  "Roseland",
-  "Pullman",
-  "East Side",
-  "Calumet Heights",
-  "Hyde Park, Woodlawn"
-]
-
-var locations = [
-  {lat: 41.948 , lng: -87.808}, // Dunning - Dunning Coniac KILCHICA490
-  {lat: 41.947 , lng: -87.747}, // Portage Park - North Side KILCHICA189
-  {lat: 41.920 , lng: -87.745}, // Belmont Cragin + Hermosa- Chicago KILCHICA491
-  {lat: 41.897 , lng: -87.779}, // Austin - Oak Park KILOAKPA9
-  {lat: 41.938 , lng: -87.684}, // North Center - Roscoe Village KILCHICA317
-  {lat: 41.936 , lng: -87.731}, // Avondale - Belmont Gardens KILCHICA428
-  {lat: 41.914 , lng: -87.688}, // Logan Square - Chicago KILCHICA537
-  {lat: 41.892 , lng: -87.686}, // Smith Park - Ukranian Villiage KILCHICA535
-  {lat: 41.897 , lng: -87.684}, //Ukrainian Village/West Town- West Town KILCHICA266
-  {lat: 41.891 , lng: -87.659}, // West Town/Noble Square - West Town KILCHICA199
-  {lat: 41.881 , lng: -87.658}, // Near West Side- West Loop KILCHICA530
-  {lat: 41.879 , lng: -87.643}, // Near West Side/Greektown  - West Loop - Old St. Pats KILCHICA130
-  {lat: 41.894 , lng: -87.641}, // River North - Central KILCHICA368
-  {lat: 41.899 , lng: -87.632}, // Rush & Division/Near North - River North KILCHICA507
-  {lat: 41.892 , lng: -87.613}, // Navy Pier, Streeterville - Central KILCHICA223
-  {lat: 41.895 , lng: -87.627}, // Magnificent Mile, Streeterville - Central KILCHICA231
-  {lat: 41.903 , lng: -87.626}, // Gold Coast - Central KILCHICA253
-  {lat: 41.911 , lng: -87.644}, // Old Town, Lincoln Park - Lincoln Park KILCHICA516
-  {lat: 41.924 , lng: -87.657}, // Sheffield & DePaul, Lincoln Park - Lincoln Park KILCHICA106
-  {lat: 41.933 , lng: -87.661}, // Lake View - North Side KILCHICA366
-  {lat: 41.932 , lng: -87.640}, // Lake View - Park West KILCHICA421
-  {lat: 41.946 , lng: -87.650}, // Boystown/Wrigley Field - East Lakeview KILCHICA173
-  {lat: 41.956 , lng: -87.646}, // Uptown - North Side KILCHICA207
-  {lat: 41.963 , lng: -87.651}, // Uptown, Lincoln Square - Uptown KILCHICA489
-  {lat: 41.969 , lng: -87.668}, // Uptown/Ravenswood - Andersonville Gateway (Ravenswood) KILCHICA483
-  {lat: 41.980 , lng: -87.666}, // Andersonville - Andersonville KILCHICA357
-  {lat: 41.974 , lng: -87.677}, // Ravenswood - Chicago KILCHICA468
-  {lat: 41.986 , lng: -87.655}, //Edgewater - North Side KILCHICA221
-  {lat: 42.008 , lng: -87.663}, //Rogers Park - North Side KILCHICA330
-  {lat: 42.007 , lng: -87.694}, //West Ridge - Chicago KILCHICA536
-  {lat: 41.970 , lng: -87.714}, //North Park & Albany Park - North Side KILCHICA401
-  {lat: 41.979 , lng: -87.790}, //Norwood Park, Jefferson Park, Edgebrook, Edison Park - Chicago KILCHICA470
-  {lat: 41.962 , lng: -87.846}, //O'Hare - O'Hare KILCHICA364
-  {lat: 41.870 , lng: -87.684}, //Little Italy - Near West Side KILCHICA370
-  {lat: 41.848 , lng: -87.648}, //Bridgeport, Chinatown, Armour Square - South Side KILCHICA450
-  {lat: 41.857 , lng: -87.623}, //South Loop/Grant Park/Near South Side - Near South Side KILCHICA166
-  {lat: 41.865 , lng: -87.622}, //Loop/Grant Park, Near East Side - South Loop (Central Station) KILCHICA310
-  {lat: 41.835 , lng: -87.629}, //Bronzeville, Back of the Yards, Kenwood - Illinois Tech KILCHICA534
-  {lat: 41.820 , lng: -87.701}, //Little Village, North Lawndale, South Lawndale, Brighton Park, Archer Heights, Midway, West Elsdon, Gage Park - Brighton Park KILCHICA225
-  {lat: 41.778 , lng: -87.743}, //Midway, West Lawn, Ashburn, Gage Park, West Elsdon - Midway Airport, South West side of Chicago KILCHICA37
-  {lat: 41.716 , lng: -87.676}, // Beverly, Auburn Gresham, Morgan Park - Beverly KILCHICA376
-  {lat: 41.688 , lng: -87.606}, //Roseland (Washington Heights), West Pullman, Pullman, Riverdale - Historic Pullman KILCHICA463
-  {lat: 41.699 , lng: -87.593}, //Pullman, Southeast Side - South Deering - Harborside Golf KILCHICA529
-  {lat: 41.692 , lng: -87.533}, // East Side, Southeast Side - East Side of Chicago KILCHICA495
-  {lat: 41.73  , lng: -87.538}, //Calumet Heights, South Chicago, Chatham, Avalon Park, South Shore, Grand Crossing - Marine CMTI2
-  {lat: 41.801 , lng: -87.601}, //Hyde Park, Woodlawn, Grand Crossing, Jackson Park, Washington Park, Kenwood, Grand Boulevard KILCHICA291
-]
-
+  function locToCommaSep(loc) {
+    return loc["lat"] + "," + loc["lng"];
+  }
+ function showPlacesHere(loc) {
+   console.log("show places here");
+   console.log(loc);
+   console.log(attrType);
+   $.ajax({
+     url: 'https://places.demo.api.here.com/places/v1/discover/explore',
+     type: 'GET',
+     data: {
+       at: loc,
+       cat: attrType,
+       app_id: 'p12uI7q3kXyMbTvWxVwy',
+       app_code: 'Vwb0ubafZTNhrG-4g6EGIA'
+     },
+     beforeSend: function(xhr){
+       xhr.setRequestHeader('Accept', 'application/json');
+     },
+     success: function (data) {
+       showHerePlaces(commaSepToLoc(loc), data);
+     }
+   });
+ }
+ function processWantToDo() {
+   var wantToDoChoice = document.getElementById("wantToDoChoice");
+   var wantToDoText = document.getElementById("wantToDoText");
+   var category = wantToDoChoice.options[wantToDoChoice.selectedIndex].value;
+   var activity = wantToDoChoice.options[wantToDoChoice.selectedIndex].text;
+   var encouragingPhrase = "Let's " + activity.toLowerCase() + "! "
+   + "Click a weather icon for to see ur options";
+   wantToDoText.innerHTML = encouragingPhrase;
+   attrType = category;
+   console.log(attrType);
+ }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBEx5L3qryD0FaDRo9EZMrsiLRyjm49-CI&callback=initMap"
-async defer></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBEx5L3qryD0FaDRo9EZMrsiLRyjm49-CI&libraries=geometry,places,visualization">  </script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+<script src="js/maps.js" type="text/javascript"></script>
+<script src="chicago_neighborhoods.json"></script>
 <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBEx5L3qryD0FaDRo9EZMrsiLRyjm49-CI&libraries=geometry,places,visualization&callback=initMap" async defer></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </body>
 </html>
