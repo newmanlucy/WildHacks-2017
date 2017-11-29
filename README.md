@@ -14,6 +14,8 @@
 
 Real time weather data integrated with activity recommendations across Chicago neighborhoods!
 
+You will need keys for each of the APIs implemented for any cloned code to work.
+
 
 ### Credits
 
